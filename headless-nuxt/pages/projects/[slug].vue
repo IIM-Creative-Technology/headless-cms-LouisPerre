@@ -8,16 +8,16 @@
       </div>
       <div class="nav">
         <nuxt-link
-            :to="`/projects/${previousProject}`"
+            v-if="previousProject !== null"
+            :to="`/projects/${previousProject}` previousProject !== null"
             class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            :class="{'cursor-not-allowed bg-neutral-500' : previousProject === null}"
         >
           Previous Project
         </nuxt-link>
         <nuxt-link
+            v-if="nextProject !== null"
             :to="`/projects/${nextProject}`"
             class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            :class="{'cursor-not-allowed bg-neutral-500' : nextProject === null}"
         >
           Next Project
         </nuxt-link>
