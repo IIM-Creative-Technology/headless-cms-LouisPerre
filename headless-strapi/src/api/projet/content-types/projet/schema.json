@@ -27,6 +27,27 @@
     "slug": {
       "type": "uid",
       "targetField": "name"
+    },
+    "technologies": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::technology.technology"
+    },
+    "description": {
+      "type": "text"
+    },
+    "colorString": {
+      "type": "customField",
+      "regex": "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$",
+      "customField": "plugin::color-picker.color"
+    },
+    "type": {
+      "type": "enumeration",
+      "enum": [
+        "IIM",
+        "Perso",
+        "Pro"
+      ]
     }
   }
 }
