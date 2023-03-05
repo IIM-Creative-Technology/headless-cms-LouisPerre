@@ -1,7 +1,7 @@
 ## Host ##
 
 The project is up on :
-https://headless-pvv7rv01h-louisperre.vercel.app/
+https://headless-cms-lime.vercel.app/
 
 The front is on Vercel and the back on railway just here :
 https://headlesscms-production.up.railway.app/
