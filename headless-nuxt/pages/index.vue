@@ -1,17 +1,4 @@
 <template>
-<!--    <div class="buttonFilter">-->
-<!--      <div class="sticky">-->
-<!--        <div v-if="types" class="mb-4">-->
-<!--          Filtrer par projets-->
-<!--        </div>-->
-<!--        <div class="flex gap-4">-->
-<!--          <button class="filter-button" @click="filterProjects('all')">Reset</button>-->
-<!--          <button class="filter-button" v-for="type in types" @click="filterProjects(type)"-->
-<!--                  :class="{'bgActive': activeFilter === type}"-->
-<!--          >{{type}}</button>-->
-<!--        </div>-->
-<!--      </div>-->
-<!--    </div>-->
     <div v-if="projects" class="grid grid-cols-6 gap-4">
       <div class="firstElement flex flex-col gap-12 p-8">
         <h2>Hello, I’m Louis, a web Developer With 2 years of experience.</h2>
@@ -38,7 +25,15 @@
         </div>
         <div class="technoSort">
           <div class="techoButtons">
-            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Symfony</button>
+            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" @click="filterProjectsByTechno('all')">Reset</button>
+            <button
+              class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              v-for="techno in technos"
+              @click="filterProjectsByTechno(techno)"
+              :class="{'bgActive': activeTechno === techno}"
+            >
+              {{ techno }}
+            </button>
           </div>
         </div>
       </div>
@@ -75,20 +70,58 @@ const { find } = useStrapi();
 const projects = ref()
 const types = ref([])
 const activeFilter = ref('all')
+const activeTechno = ref('all')
+const technos = ref([])
+const technosInProject = ref([])
+const projectsSlug = ref([])
 
 const filterProjects = (type) => {
   activeFilter.value = type
 }
 
+const filterProjectsByTechno = (techno) => {
+  activeTechno.value = techno
+}
+
 const filteredProjects = computed(() => {
-  if (activeFilter.value === 'all') return projects.value.data
-  return projects.value.data.filter(project => project.type === activeFilter.value)
+  if (activeFilter.value === 'all' && activeTechno.value === 'all') return projects.value.data
+  if (activeTechno.value === 'all' && activeFilter.value !== 'all') {
+    return projects.value.data.filter(project => project.type === activeFilter.value)
+  } else if (activeFilter.value === 'all' && activeTechno.value !== 'all') {
+    return projects.value.data.filter(project => {
+      return project.technologies.find(tech => {
+        return tech.name === activeTechno.value
+      })
+    })
+  } else {
+    return projects.value.data.filter(project => {
+      return project.technologies.find(tech => {
+        return tech.name === activeTechno.value
+      }) && project.type === activeFilter.value
+    })
+  }
+})
+
+const filteredProjectsByTechno = computed(() => {
+  if (activeTechno.value === 'all') return projects.value.data
+  return projects.value.data.filter(project => project.technologies.filter(techno => techno.slug === activeTechno.toLowerCase()))
 })
 
 onMounted(async () => {
+  technos.value = new Set
   projects.value = await find('projets', {populate: 'deep'})
   types.value = new Set(projects.value.data.map(project => {
+    technosInProject.value = new Set(project.technologies.map(techno => {
+      return techno.name
+    }))
+    let tempArray = Array.from(technosInProject.value.values())
+    tempArray.map(techno => {
+      technos.value.add(techno)
+    })
     return project.type
+  }))
+  projectsSlug.value = new Set(projects.value.data.map(project => {
+    return project.slug
   }))
 
   // Permet de trier les projets par type en comparant les types, si le types de A est egal a celui de B on retourne 0 donc ensemble sinon moins ou plus 1
@@ -265,6 +298,10 @@ onMounted(async () => {
   z-index: 2;
 
   .typesButtons {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .techoButtons {
     display: flex;
     gap: 0.5rem;
   }

@@ -1,9 +1,27 @@
 <template>
-    <div class="goBack mb-4">
-      <ArrowUturnLeftIcon class="block h-6 w-6 text-black" />
-      <nuxt-link to="/">
-        <p>Retourner sur la liste</p>
-      </nuxt-link>
+    <div class="head">
+      <div class="goBack">
+        <ArrowUturnLeftIcon class="block h-6 w-6 text-black" />
+        <nuxt-link to="/">
+          <p>Retourner sur la liste</p>
+        </nuxt-link>
+      </div>
+      <div class="nav">
+        <nuxt-link
+            :to="`/projects/${previousProject}`"
+            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            :class="{'cursor-not-allowed bg-neutral-500' : previousProject === null}"
+        >
+          Previous Project
+        </nuxt-link>
+        <nuxt-link
+            :to="`/projects/${nextProject}`"
+            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            :class="{'cursor-not-allowed bg-neutral-500' : nextProject === null}"
+        >
+          Next Project
+        </nuxt-link>
+      </div>
     </div>
     <div v-if="project">
       <div class="heroHeader">
@@ -33,18 +51,57 @@
 <script setup>
     import { ArrowUturnLeftIcon } from '@heroicons/vue/24/solid'
     const { findOne } = useStrapi()
+    const { find } = useStrapi()
     const route = useRoute()
     const project = ref()
+    const projects = ref()
+    const projectsSlug = ref([])
+    const previousProject = ref(null)
+    const nextProject = ref(null)
+    const currentProject = ref(0)
 
     onMounted(async () => {
         project.value = await findOne(`projets?filters[slug]=${route.params.slug}&populate=deep`)
         project.value = project.value.data[0]
-        console.log(project)
+        projects.value = await find('projets', {populate: 'deep'})
+        projects.value.data.map(project => {
+          projectsSlug.value.push(project.slug)
+        })
+        currentProject.value = projectsSlug.value.findIndex(slug => slug === route.params.slug)
+        if (currentProject.value !== 0) {
+          previousProject.value = projectsSlug.value[currentProject.value - 1]
+        } else if (currentProject.value - (projectsSlug.value.length - 1) !== 0) {
+          nextProject.value = projectsSlug.value[currentProject.value + 1]
+        }
+
+        if (currentProject.value !== 0 && (projectsSlug.value.length  - 1) - currentProject.value !== 0) {
+          previousProject.value = projectsSlug.value[currentProject.value - 1]
+          nextProject.value = projectsSlug.value[currentProject.value + 1]
+        } else if (currentProject.value === 0 && (projectsSlug.value.length - 1) - currentProject.value !== 0) {
+          nextProject.value = projectsSlug.value[currentProject.value + 1]
+        } else if (currentProject.value !== 0 && (projectsSlug.value.length - 1) - currentProject.value === 0) {
+          previousProject.value = projectsSlug.value[currentProject.value - 1]
+        } else {
+          nextProject.value = null
+          previousProject.value = null
+        }
+
+
+      console.log(previousProject.value)
+      console.log(currentProject.value)
+      console.log(nextProject.value)
     })
 
 </script>
 
 <style lang="scss">
+.head {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+
   .goBack {
     display: flex;
     justify-content: left;
@@ -56,6 +113,13 @@
       text-decoration: underline;
     }
   }
+
+  .nav {
+    display: flex;
+    gap: 0.5rem;
+  }
+}
+
 
   .heroHeader {
     width: 100%;
