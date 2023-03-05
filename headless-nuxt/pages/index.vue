@@ -282,8 +282,7 @@ onMounted(async () => {
   padding: 1rem;
   border-radius: 12px;
   position: sticky;
-  max-width: 1200px;
-  width: 80vw;
+  width: 100%;
   justify-content: space-between;
   align-items: center;
   top: 10px;
