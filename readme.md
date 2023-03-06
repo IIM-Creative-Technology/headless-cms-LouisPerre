@@ -3,6 +3,8 @@
 The project is up on :
 https://headless-cms-lime.vercel.app/
 
+If the site dosen't appear right away just wait the back need to restart !
+
 The front is on Vercel and the back on railway just here :
 https://headlesscms-production.up.railway.app/
 
